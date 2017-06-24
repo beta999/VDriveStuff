@@ -25,6 +25,7 @@ namespace ConsoleApplication2
                     //This should work otherwise I need to figure out a better method of figuring out if it uses a GXT file
                     if (item.ImgType == 0)
                     {
+						//TODO convert GXT TO dds
                         //Just going to output raw GXT data for now
                         File.WriteAllBytes(string.Format("{0}/tex{1}.GXT", dir, i), item.data);
                         mapping.WriteLine("{0}={1}", file.Header.Offsets[i]+item.EntrySize, string.Format("{0}/tex{1}.GXT", dir, i));
