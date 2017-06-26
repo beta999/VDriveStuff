@@ -63,7 +63,7 @@ namespace MIBExplorer
                         }
                     }
                     currentMIB.UpdateOffsets();
-                    currentMIB.WriteFile(string.Format("{0}_1.mib", dir));
+                    currentMIB.WriteFile(string.Format("{0}.mib", dir));
                 }
             }
 
