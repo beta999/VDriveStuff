@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Runtime.InteropServices;
 namespace VDriveFiles
 {
     public class VDriveMibEntry : VDriveEntry
@@ -26,6 +27,18 @@ namespace VDriveFiles
         public short Unk7 { get; set; }
         public string Name { get; set; }
         public byte[] data { get; set; }
+        public string InternalID { get; set; }
+      public  static Dictionary<int, int> DXTMapping = new Dictionary<int, int>();
+        static bool RunInit = false;
+        static void InitMapping()
+        {
+            DXTMapping.Add(827611204, 8);
+            DXTMapping.Add(861165636, 9);
+            DXTMapping.Add(894720068, 10);
+            RunInit = true;
+
+        }
+
         public VDriveMibEntry()
         {
 
@@ -35,13 +48,14 @@ namespace VDriveFiles
             LoadData(br);
 
         }
+
         override public void LoadData(BinaryReader br)
         {
             var offset = br.BaseStream.Position;
             base.LoadData(br);
             EncodingType = br.ReadInt32();
-            Height = br.ReadUInt16();
             Width = br.ReadUInt16();
+            Height = br.ReadUInt16();
             Unk1 = br.ReadInt16();
             ImgType = br.ReadByte();
             MimmapLevels = br.ReadByte();
@@ -57,13 +71,82 @@ namespace VDriveFiles
             do
             {
                 curr = br.ReadByte();
-                builder.Append(Convert.ToChar(curr));
+                if (curr != 0)
+                {
+                    builder.Append(Convert.ToChar(curr));
+                }
             } while (curr!=0);
             Name = builder.ToString();
             br.BaseStream.Seek(offset+EntrySize, SeekOrigin.Begin);
             data = br.ReadBytes(DataSize);
 
 
+        }
+        public void UpdateData(byte[] newData)
+        {
+            DataSize = newData.Length;
+            SameAsDataSize = (short)DataSize;
+            data = newData;
+
+        }
+        override public void WriteData(BinaryWriter bw)
+        {
+            var offset = bw.BaseStream.Position;
+            base.WriteData(bw);
+            bw.Write(EncodingType);
+            bw.Write(Width);
+            bw.Write(Height);
+            bw.Write(Unk1);
+            bw.Write(ImgType);
+            bw.Write(MimmapLevels);
+            bw.Write(Unk2);
+            bw.Write(Unk3);
+            bw.Write(Unk4);
+            bw.Write(SameAsDataSize);
+            bw.Write(Unk5);
+            bw.Write(Unk6);
+            bw.Write(Unk7);
+            bw.Write(Encoding.ASCII.GetBytes(Name));
+            bw.BaseStream.Seek(offset + EntrySize, SeekOrigin.Begin);
+            bw.Write(data, 0, DataSize);
+            
+        }
+        public  DDSFile GetDDSFile()
+        {
+            var ddsFile= new DDSFile();
+            ddsFile.Size = 124;
+            ddsFile.Height = Height;
+            ddsFile.Width = Width;
+            ddsFile.MipMapCount = (uint)(MimmapLevels - 1);
+            ddsFile.PixelFormat =DDSFile.EncodingValues[EncodingType-8];
+            ddsFile.Pitch = 0;
+            ddsFile.Depth = 0;
+            if (MimmapLevels > 1)
+                ddsFile.Caps = 8 | 0x400000;
+            else
+                ddsFile.Caps = 0;
+            ddsFile.Caps |= 0x1000;
+            ddsFile.data = data;
+            return ddsFile;
+        }
+        public bool isDDS
+        {
+            get
+            {
+                return ImgType == 3;
+            }
+        }
+        public void UpdateFromDDS(DDSFile file)
+        {
+            if (!RunInit)
+                InitMapping();
+            data = file.data;
+            DataSize = file.data.Length;
+            SameAsDataSize = (short)file.data.Length;
+            Width = (ushort)file.Width;
+            Height = (ushort)(file.Height);
+            MimmapLevels = (byte)(file.MipMapCount + 1);
+            EncodingType = DXTMapping[file.PixelFormat];
         }
     }
 }

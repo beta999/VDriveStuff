@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DDSFile.cs" />
     <Compile Include="VDriveHeader.cs" />
     <Compile Include="VDriveEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

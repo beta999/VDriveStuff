@@ -14,6 +14,7 @@ namespace VDriveFiles
         public int EntrySize { get; set; }
         public short Type { get; set; }
         public short Count { get; set; }
+
         public VDriveEntry()
         {
             
@@ -25,6 +26,14 @@ namespace VDriveFiles
             EntrySize = br.ReadInt32();
             Type = br.ReadInt16();
             Count = br.ReadInt16();
+        }
+        virtual public void WriteData(BinaryWriter bw)
+        {
+            bw.Write(Magic);
+            bw.Write(DataSize);
+            bw.Write(EntrySize);
+            bw.Write(Type);
+            bw.Write(Count);
         }
         public VDriveEntry(BinaryReader br)
         {

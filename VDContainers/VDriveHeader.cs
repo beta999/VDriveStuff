@@ -29,5 +29,19 @@ namespace VDriveFiles
                 Offsets.Add(br.ReadInt32());
             }
         }
+        public void WriteData(BinaryWriter bw)
+        {
+            bw.Write(Signature);
+            bw.Write(Version);
+            bw.Write(Type);
+            bw.Write(Unk1);
+            bw.Write(OffsetCount);
+            foreach (var item in Offsets)
+            {
+                bw.Write(item);
+            }
+            
+        }
+
     }
 }

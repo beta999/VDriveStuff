@@ -38,7 +38,7 @@ namespace MIBUtil
                     {
                         mapping.WriteLine("{0}={1}", file.Header.Offsets[i] + item.EntrySize, string.Format("{0}\\tex{1}.dds", dir, i));
 
-                        DDSHeader ddsHeader = new DDSHeader();
+                        DDSFile ddsHeader = new DDSFile();
                         ddsHeader.Size = 124;
                         ddsHeader.Height = item.Height;
                         ddsHeader.Width = item.Width;
@@ -51,13 +51,7 @@ namespace MIBUtil
                         else
                             ddsHeader.Caps = 0;
                         ddsHeader.Caps |= 0x1000;
-                        using (var bw = new BinaryWriter(File.OpenWrite(string.Format("{0}\\tex{1}.dds", dir, i))))
-                        {
-                            byte[] dat = { 0x44, 0x44, 0x53, 0x20 };
-                            bw.Write(dat);
-                            ddsHeader.WriteData(bw);
-                            bw.Write(item.data, 0, item.DataSize);
-                        }
+                        ddsHeader.WriteData(string.Format("{0}\\tex{1}.dds", dir, i));
 
                     }
                     i++;
