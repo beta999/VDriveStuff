@@ -21,37 +21,12 @@ namespace MIBUtil
             {
                 foreach (var item in file.Entries)
                 {
-                    FileInfo finfo = new FileInfo(fileName);
-                    //This should work otherwise I need to figure out a better method of figuring out if it uses a GXT file
-                    if (item.ImgType == 0)
-                    {
-                        //Just going to output raw GXT data for now
-                        File.WriteAllBytes(string.Format("{0}/tex{1}.GXT", dir, i), item.data);
-                        mapping.WriteLine("{0}={1}", file.Header.Offsets[i]+item.EntrySize, string.Format("{0}/tex{1}.GXT", dir, i));
-                        /*
-                        GXT gxt = new GXT();
-                        gxt.Open(new MemoryStream(item.data));
-                        gxt.GetBitmap().Save(string.Format("{0}/{0}/{1}.png", dir, i), System.Drawing.Imaging.ImageFormat.Png);
-                        */
-                    }
-                    else if (item.ImgType == 3)
-                    {
-                        mapping.WriteLine("{0}={1}", file.Header.Offsets[i] + item.EntrySize, string.Format("{0}\\tex{1}.dds", dir, i));
 
-                        DDSFile ddsHeader = new DDSFile();
-                        ddsHeader.Size = 124;
-                        ddsHeader.Height = item.Height;
-                        ddsHeader.Width = item.Width;
-                        ddsHeader.MipMapCount = item.MimmapLevels;
-                        ddsHeader.PixelFormat = item.EncodingType;
-                        ddsHeader.Pitch = 0;
-                        ddsHeader.Depth = 0;
-                        if (item.MimmapLevels > 1)
-                            ddsHeader.Caps = 8 | 0x400000;
-                        else
-                            ddsHeader.Caps = 0;
-                        ddsHeader.Caps |= 0x1000;
-                        ddsHeader.WriteData(string.Format("{0}\\tex{1}.dds", dir, i));
+                    if (item.isDDS)
+                    {
+
+                        var ddsHeader = item.GetDDSFile();
+                        ddsHeader.WriteData(string.Format("{0}\\{1}.dds", dir, item.InternalID));
 
                     }
                     i++;
@@ -63,31 +38,21 @@ namespace MIBUtil
         static void Update(string fileName)
         {
             string dir = fileName.Substring(0, fileName.Length - 4);
-            if(Directory.Exists(dir))
+            if (Directory.Exists(dir))
             {
-
-                VDriveHeader header = new VDriveHeader();
-                var mappings = File.ReadAllLines(dir + "/mapping.txt");
-                using (var bw = new BinaryWriter(File.OpenWrite(fileName)))
+                VDriveMibFile outfile = new VDriveMibFile(fileName);
+                foreach (var item in outfile.Entries)
                 {
-                    foreach (var item in mappings.Select(x => x.Split('=')))
+                    if (item.isDDS)
                     {
-                        int off = int.Parse(item[0]);
-                        string filename = item[1];
-                        var dat = File.ReadAllBytes(filename);
-                        bw.BaseStream.Seek(off, SeekOrigin.Begin);
-
-                        if (filename.Contains("GXT"))
-                        {
-                            bw.Write(dat);
-                        }
-                        else if(filename.Contains("dds"))
-                        {
-                            bw.Write(dat,128,dat.Length-128);
-
-                        }
+                        DDSFile dds = new DDSFile();
+                        if (dds.ReadData(string.Format("{0}/{1}.dds", dir, item.InternalID)))
+                            item.UpdateFromDDS(dds);
                     }
+
                 }
+                outfile.UpdateOffsets();
+                outfile.WriteFile(fileName);
             }
             else
             {

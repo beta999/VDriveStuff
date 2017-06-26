@@ -58,37 +58,41 @@ namespace VDriveFiles
                     bw.Write(data);
             }
         }
-        public void ReadData(string fileName)
+        public bool ReadData(string fileName)
         {
             using (var br = new BinaryReader(File.OpenRead(fileName)))
             {
-                br.ReadInt32();//read magic
-                Size = br.ReadUInt32();
-                Flags = br.ReadUInt32();
-                Height = br.ReadUInt32();
+                var magic=br.ReadInt32();//read magic
+                if (magic == 0x20534444)
+                {
+                    Size = br.ReadUInt32();
+                    Flags = br.ReadUInt32();
+                    Height = br.ReadUInt32();
 
-                Width = br.ReadUInt32();
-                Pitch = br.ReadUInt32();
-                Depth = br.ReadUInt32();
-                MipMapCount = br.ReadUInt32();
-                for (int i = 0; i < 13; i++)
-                {
-                    br.ReadUInt32();
+                    Width = br.ReadUInt32();
+                    Pitch = br.ReadUInt32();
+                    Depth = br.ReadUInt32();
+                    MipMapCount = br.ReadUInt32();
+                    for (int i = 0; i < 13; i++)
+                    {
+                        br.ReadUInt32();
+                    }
+                    PixelFormat = br.ReadInt32();
+                    for (int i = 0; i < 5; i++)
+                    {
+                        br.ReadUInt32();
+                    }
+                    Caps = br.ReadUInt32();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        br.ReadUInt32();
+                    }
+                    int len = (int)br.BaseStream.Length - 128;
+                    data = br.ReadBytes(len);
+                    return true;
                 }
-                PixelFormat = br.ReadInt32();
-                for (int i = 0; i < 5; i++)
-                {
-                    br.ReadUInt32();
-                }
-                Caps = br.ReadUInt32();
-                for (int i = 0; i < 4; i++)
-                {
-                    br.ReadUInt32();
-                }
-                int len = (int)br.BaseStream.Length - 128;
-                data = br.ReadBytes(len);
-
             }
+            return false;
         }
 
     }

@@ -51,15 +51,17 @@ namespace MIBExplorer
             var dir = string.Format("{0}/{1}", textBox1.Text, str.Substring(0, str.Length - 4));
             if (Directory.Exists(dir))
             {
-                if(currentMIB!=null)
+                if (currentMIB != null)
                 {
                     foreach (var item in currentMIB.Entries)
                     {
-                        if(item.isDDS)
+                        if (item.isDDS)
                         {
                             DDSFile dds = new DDSFile();
-                            dds.ReadData(string.Format("{0}/{1}.dds", dir, item.InternalID));
-                            item.UpdateFromDDS(dds);
+                            if (dds.ReadData(string.Format("{0}/{1}.dds", dir, item.InternalID)))
+                            {
+                                item.UpdateFromDDS(dds);
+                            }
                         }
                     }
                     currentMIB.UpdateOffsets();

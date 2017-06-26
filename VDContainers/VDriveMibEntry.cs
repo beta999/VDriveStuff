@@ -67,16 +67,17 @@ namespace VDriveFiles
             Unk6 = br.ReadInt16();
             Unk7 = br.ReadInt16();
             byte curr = 0;
+            List<byte> nameBytes = new List<byte>();
             StringBuilder builder = new StringBuilder();
             do
             {
                 curr = br.ReadByte();
-                if (curr != 0)
-                {
-                    builder.Append(Convert.ToChar(curr));
-                }
+                    nameBytes.Add(curr);
+                
             } while (curr!=0);
-            Name = builder.ToString();
+            Name=ASCIIEncoding.ASCII.GetString(nameBytes.ToArray());
+            Name = Name.Substring(0, Name.Length - 1);
+           /// Name = builder.ToString();
             br.BaseStream.Seek(offset+EntrySize, SeekOrigin.Begin);
             data = br.ReadBytes(DataSize);
 
@@ -107,6 +108,11 @@ namespace VDriveFiles
             bw.Write(Unk6);
             bw.Write(Unk7);
             bw.Write(Encoding.ASCII.GetBytes(Name));
+            var paddingStart = bw.BaseStream.Position;
+            for (long i = paddingStart; i < offset + EntrySize; i++)
+            {
+                bw.Write((byte)0);
+            }
             bw.BaseStream.Seek(offset + EntrySize, SeekOrigin.Begin);
             bw.Write(data, 0, DataSize);
             
