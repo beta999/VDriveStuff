@@ -28,7 +28,7 @@ namespace VDriveFiles
         public string Name { get; set; }
         public byte[] data { get; set; }
         public string InternalID { get; set; }
-      public  static Dictionary<int, int> DXTMapping = new Dictionary<int, int>();
+        public static Dictionary<int, int> DXTMapping = new Dictionary<int, int>();
         static bool RunInit = false;
         static void InitMapping()
         {
@@ -75,7 +75,7 @@ namespace VDriveFiles
                     nameBytes.Add(curr);
                 
             } while (curr!=0);
-            Name=ASCIIEncoding.ASCII.GetString(nameBytes.ToArray());
+            Name= Encoding.GetEncoding("SHIFT-JIS").GetString(nameBytes.ToArray());
             Name = Name.Substring(0, Name.Length - 1);
            /// Name = builder.ToString();
             br.BaseStream.Seek(offset+EntrySize, SeekOrigin.Begin);
@@ -107,7 +107,7 @@ namespace VDriveFiles
             bw.Write(Unk5);
             bw.Write(Unk6);
             bw.Write(Unk7);
-            bw.Write(Encoding.ASCII.GetBytes(Name));
+            bw.Write(Encoding.GetEncoding("SHIFT-JIS").GetBytes(Name));
             var paddingStart = bw.BaseStream.Position;
             for (long i = paddingStart; i < offset + EntrySize; i++)
             {

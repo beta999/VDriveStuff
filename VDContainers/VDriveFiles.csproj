@@ -40,12 +40,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="VDriveMaterialEntry.cs" />
+    <Compile Include="VertexData\BoneList.cs" />
+    <Compile Include="VertexData\FaceInfo.cs" />
+    <Compile Include="VertexData\HalfFloat.cs" />
     <Compile Include="DDSFile.cs" />
+    <Compile Include="VDriveMSBFile.cs" />
+    <Compile Include="VDriveMSBMeshEntry.cs" />
     <Compile Include="VDriveHeader.cs" />
     <Compile Include="VDriveEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VDriveMibEntry.cs" />
     <Compile Include="VDriveMibFile.cs" />
+    <Compile Include="VertexData\RGBA.cs" />
+    <Compile Include="VDriveBoneEntry.cs" />
+    <Compile Include="VertexData\Vec3.cs" />
+    <Compile Include="VertexData\Vec4.cs" />
+    <Compile Include="VertexData\VertexFormat.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
